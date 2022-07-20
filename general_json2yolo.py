@@ -251,8 +251,11 @@ def convert_ath_json(json_dir):  # dir contains json annotations and images
     print(f'Done. Output saved to {Path(dir).absolute()}')
 
 
-def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91to80=False):
-    save_dir = make_dirs()  # output directory
+def convert_coco_json(json_dir='../coco/annotations/',
+                      outdir='YOLOv5/',
+                      use_segments=False,
+                      cls91to80=False):
+    save_dir = make_dirs(outdir)  # output directory
     coco80 = coco91_to_coco80_class()
 
     # Import json
@@ -294,24 +297,50 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert annotations from JSON to YOLO format.')
+
+    parser.add_argument(
+        'source',
+        type=str,
+        help='Annotations source format.',
+        metavar='SRC'
+    )
+
+    parser.add_argument(
+        '--json_dir',
+        '-j',
+        type=str,
+        help='JSON Annotations source folder.',
+        metavar='JSON_DIR'
+    )
+
+    parser.add_argument(
+        '--img_dir',
+        '-i',
+        nargs='?',
+        type=str,
+        help='Folder containing images (only needed for infolks and vott formats).',
+        metavar='IMG_DIR'
+    )
+
+    args = parser.parse_args()
     
-    source = 'COCO'
+    source = args.source
+    json_dir = args.json_dir
+    if source == 'vott' or source == 'ath':
+        images_dir = args.img_dir
 
     if source == 'COCO':
-        convert_coco_json('../../Downloads/Objects365')  # directory with *.json
+        convert_coco_json(json_dir)  # directory with *.json
 
     elif source == 'infolks':  # Infolks https://infolks.info/
         convert_infolks_json(name='out',
-                             files='../data/sm4/json/*.json',
-                             img_path='../data/sm4/images/')
+                             files=os.path.join(json_dir, '*.json'),
+                             img_path=images_dir)
 
     elif source == 'vott':  # VoTT https://github.com/microsoft/VoTT
         convert_vott_json(name='data',
-                          files='../../Downloads/athena_day/20190715/*.json',
-                          img_path='../../Downloads/athena_day/20190715/')  # images folder
+                          files=os.path.join(json_dir, '*.json'),
+                          img_path=images_dir)  # images folder
 
     elif source == 'ath':  # ath format
-        convert_ath_json(json_dir='../../Downloads/athena/')  # images folder
-
-    # zip results
-    # os.system('zip -r ../coco.zip ../coco')
+        convert_ath_json(json_dir=json_dir)  # images folder
