@@ -3,6 +3,7 @@ import json
 import cv2
 import pandas as pd
 from PIL import Image
+import argparse
 
 from utils import *
 
@@ -292,6 +293,8 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Convert annotations from JSON to YOLO format.')
+    
     source = 'COCO'
 
     if source == 'COCO':
